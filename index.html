@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+  <title>Tic-tac-toe</title>
+  <meta charset="UTF-8">
+  <meta name="description" content="A a JavaScript practice exercise that allows you to play Tic-tac-toe on the browser.">
+  <meta name="keywords" content="tic-tac-toe">
+  <meta name="author" content="crizz.bearblog.dev">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!--
+    Image source: https://openmoji.org/library/emoji-E1C1/
+    Favicon generator: https://favicon.io/favicon-converter/
+  -->
+  
+  <link rel="apple-touch-icon" sizes="180x180" href="favicon/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="favicon/favicon-16x16.png">
+  <link rel="manifest" href="favicon/site.webmanifest">
+
+  <style>
+
+    body,
+    #wrapper,
+    .tic-tac-toe,
+    #button {
+      border: 0px;
+      margin: 0px;
+      padding: 0px;
+      box-sizing: border-box;
+      font-family: Arial, Helvetica, sans-serif;
+      text-align: center;
+    }
+
+    #wrapper {
+      margin-right: auto;
+      margin-left: auto;
+      width: 300px;
+    }
+
+    #scoreboard,
+    #play-again {
+      font-family: "Courier New", Courier, monospace;
+      font-weight: bold;
+    }
+
+    #scoreboard {
+      font-size: 1.5em;
+      margin-bottom: 50px;
+    }
+
+    .tic-tac-toe {
+      display: table;
+      float: left;
+      width: 100px;
+      height: 100px;
+      cursor: pointer;
+    }
+
+    .tic-tac-toe > p {
+      display: table-cell;
+      font-size: 4em; 
+      vertical-align: middle;
+    }
+
+    .border-top {
+      border-top: 1px solid black;
+    }
+
+    .border-right {
+      border-right: 1px solid black;
+    }
+
+    .border-bottom {
+      border-bottom: 1px solid black;
+    }
+
+    .border-left {
+      border-left: 1px solid black;
+    }
+
+    #button {
+      display: none;
+      float: left;
+      width: 100%;
+      height: 80px;
+      border: 1px solid black;
+      margin-top: 50px;
+      background-color: #DFDFDF;
+    }
+
+    #button:hover {
+      border: 1px solid #999;
+      background-color: #F3F3F3;
+    }
+
+    #play-again {
+      display: table-cell;
+      font-size: 2em; 
+      vertical-align: middle;
+    }
+
+    #fork {
+      margin-top: 530px;
+      font-family: "Courier New", Courier, monospace;
+      font-size: small;
+      text-align: center;
+    }
+
+
+  </style>
+
+</head>
+
+<body>
+
+  <div id="wrapper">
+
+    <h1>Tic-tac-toe</h1>
+
+    <p id="scoreboard">Turn: X</p>
+
+    <!-- Square, top left. -->
+    <div class="tic-tac-toe border-right border-bottom" onclick="roundTurn('stl')">
+      <p id="stl">&nbsp;</p>
+    </div>
+
+    <!-- Square, top center. -->
+    <div class="tic-tac-toe border-right border-bottom border-left" onclick="roundTurn('stc')">
+      <p id="stc">&nbsp;</p>
+    </div>
+
+    <!-- Square, top right. -->
+    <div class="tic-tac-toe border-bottom border-left" onclick="roundTurn('str')">
+      <p id="str">&nbsp;</p>
+    </div>
+
+    <!-- Square, center left. -->
+    <div class="tic-tac-toe border-top border-right border-bottom" onclick="roundTurn('scl')">
+      <p id="scl">&nbsp;</p>
+    </div>
+
+    <!-- Square, middle. -->
+    <div class="tic-tac-toe border-top border-right border-bottom border-left" onclick="roundTurn('sm')">
+      <p id="sm">&nbsp;</p>
+    </div>
+
+    <!-- Square, center right. -->
+    <div class="tic-tac-toe border-top border-bottom border-left" onclick="roundTurn('scr')">
+      <p id="scr">&nbsp;</p>
+    </div>
+
+    <!-- Square, bottom left. -->
+    <div class="tic-tac-toe border-top border-right" onclick="roundTurn('sbl')">
+      <p id="sbl">&nbsp;</p>
+    </div>
+
+    <!-- Square, bottom center. -->
+    <div class="tic-tac-toe border-top border-right border-left" onclick="roundTurn('sbc')">
+      <p id="sbc">&nbsp;</p>
+    </div>
+
+    <!-- Square, bottom right. -->
+    <div class="tic-tac-toe border-top border-left" onclick="roundTurn('sbr')">
+      <p id="sbr">&nbsp;</p>
+    </div>
+
+    <div id="button" onclick="newRound()">
+      <p id="play-again">Play again!</p>
+    </div>
+
+  </div>
+
+  <script>
+
+    // Variables:
+
+    var nextPlayer = "X";
+    var lastTurn = false;
+    var turn = 1;
+    var getSquare = "";
+    var squareSelected = "";
+
+    // Variables that check if a square has already been selected:
+
+    var stl = false;
+    var stc = false;
+    var str = false;
+    var scl = false;
+    var sm = false;
+    var scr = false;
+    var sbl = false;
+    var sbc = false;
+    var sbr = false;
+
+    // Variables to check which player marked each square:
+
+    var stlInner = "";
+    var stcInner = "";
+    var strInner = "";
+    var sclInner = "";
+    var smInner = "";
+    var scrInner = "";
+    var sblInner = "";
+    var sbrInner = "";
+    var sbcInner = "";
+
+    // Functions:
+
+    // Invoked whenever the player clicks/taps on one of the squares. Determines which turn in this round is being played. There can be a maximum of 9 turns.
+
+    function roundTurn(getSquare) {
+      squareSelected = getSquare;
+      switch (turn) {
+      case 1:
+        squareTaken();
+        break;
+      case 2:
+        squareTaken();
+        break;
+      case 3:
+        squareTaken();
+        break;
+      case 4:
+        squareTaken();
+        break;
+      case 5:
+        squareTaken();
+        break;
+      case 6:
+        squareTaken();
+        break;
+      case 7:
+        squareTaken();
+        break;
+      case 8:
+        squareTaken();
+        break;
+      case 9:
+        lastTurn = true;
+        squareTaken();
+      }
+    }
+
+    // Calls the functions necessary to prepare for the next turn.
+
+    function prepareNextTurn() {
+      squareSelection();
+      turnLog();
+    }
+
+
+    // Changes the CSS “display” property of the “button” element to “table” to make it visible.
+
+    function showButton() {
+      document.getElementById("button").style.display = "table";
+    }
+
+
+    // Draws the current player’s symbol on the square.
+
+    function drawXorO() {
+      document.getElementById(squareSelected).innerHTML = nextPlayer;
+    }
+
+
+    // Applies color to the symbol based on who’s turn it was. O is red and X is blue.
+
+    function colorSymbol() {
+      if (nextPlayer == "O") {
+        document.getElementById(squareSelected).style.color = "red";
+      } else {
+        document.getElementById(squareSelected).style.color = "blue";
+      }
+    }
+
+    // Outputs text on the console indicating the turn number and player.
+
+    function turnLog() {
+      console.log("Turn " + turn + " ended. " + nextPlayer + " just played.");
+    }
+
+
+    // Determines which player’s turn it is and assigns an O or an X accordingly.
+
+    function playerTurn() {
+      if (nextPlayer == "X") {
+        nextPlayer = "O";
+        document.getElementById("scoreboard").innerHTML = "Turn: O";
+      } else {
+        nextPlayer = "X";
+        document.getElementById("scoreboard").innerHTML = "Turn: X";
+      }
+    }
+
+    // Displays the winner of the round.
+
+    function playerWon() {
+      if ((nextPlayer == "X") & (lastTurn == true)) {
+      } else if (nextPlayer == "X") {
+        nextPlayer = "O";
+      } else {
+        nextPlayer = "X";
+      }
+      console.log(nextPlayer + " won the round.");
+      document.getElementById("scoreboard").innerHTML = nextPlayer + " won the round.";
+      turn = 0;
+      showButton();
+    }
+
+
+    // Invoked in case of a draw.
+
+    function roundDraw() {
+      document.getElementById("scoreboard").innerHTML = "Draw.";
+      turn = 0;
+      showButton();
+    }
+
+
+    // Determines which square was selected.
+
+    function squareSelection() {
+      switch (squareSelected) {
+      case "stl":
+        console.log(nextPlayer + " just selected the top left square.");
+        break;
+      case "stc":
+        console.log(nextPlayer + " just selected the top center square.");
+        break;
+      case "str":
+        console.log(nextPlayer + " just selected the top right square.");
+        break;
+      case "scl":
+        console.log(nextPlayer + " just selected the center left square.");
+        break;
+      case "sm":
+        console.log(nextPlayer + " just selected the middle square.");
+        break;
+      case "scr":
+        console.log(nextPlayer + " just selected the center right square.");
+        break;
+      case "sbl":
+        console.log(nextPlayer + " just selected the bottom left square.");
+        break;
+      case "sbc":
+        console.log(nextPlayer + " just selected the bottom center square.");
+        break;
+      case "sbr":
+        console.log(nextPlayer + " just selected the bottom right square.");
+      }
+    }
+
+    // Checks the square selected to verify if it is already taken.
+
+    function squareTaken() {
+      switch (squareSelected) {
+      case "stl":
+        stlInner = nextPlayer;
+        if ((stl == true) & (turn == 9)) {
+          console.log("The top left square is already taken.");
+        } else if ((stl == false) & (turn == 9)) {
+          drawXorO();
+          colorSymbol();
+          prepareNextTurn();
+          checkIfRow();
+        } else if (stl == false) {
+          drawXorO();
+          colorSymbol();
+          stl = true;
+          prepareNextTurn();
+          playerTurn();
+          turn++;
+          checkIfRow();
+        } else {
+          console.log("The top left square is already taken.");
+        }
+        break;
+      case "stc":
+        stcInner = nextPlayer;
+        if ((stc == true) & (turn == 9)) {
+          console.log("The top center square is already taken.");
+        } else if ((stc == false) & (turn == 9)) {
+          drawXorO();
+          colorSymbol();
+          prepareNextTurn();
+          checkIfRow();
+        } else if (stc == false) {
+          drawXorO();
+          colorSymbol();
+          stc = true;
+          prepareNextTurn();
+          playerTurn();
+          turn++;
+          checkIfRow();
+        } else {
+          console.log("The top center square is already taken.");
+        }
+        break;
+      case "str":
+        strInner = nextPlayer;
+        if ((str == true) & (turn == 9)) {
+          console.log("The top right square is already taken.");
+        } else if ((str == false) & (turn == 9)) {
+          drawXorO();
+          colorSymbol();
+          prepareNextTurn();
+          checkIfRow();
+        } else if (str == false) {
+          drawXorO();
+          colorSymbol();
+          str = true;
+          prepareNextTurn();
+          playerTurn();
+          turn++;
+          checkIfRow();
+        } else {
+          console.log("The top right square is already taken.");
+        }
+        break;
+      case "scl":
+        sclInner = nextPlayer;
+        if ((scl == true) & (turn == 9)) {
+          console.log("The center left square is already taken.");
+        } else if ((scl == false) & (turn == 9)) {
+          drawXorO();
+          colorSymbol();
+          prepareNextTurn();
+          checkIfRow();
+        } else if (scl == false) {
+          drawXorO();
+          colorSymbol();
+          scl = true;
+          prepareNextTurn();
+          playerTurn();
+          turn++;
+          checkIfRow();
+        } else {
+          console.log("The center left square is already taken.");
+        }
+        break;
+      case "sm":
+        smInner = nextPlayer;
+        if ((sm == true) & (turn == 9)) {
+          console.log("The middle square is already taken.");
+        } else if ((sm == false) & (turn == 9)) {
+          drawXorO();
+          colorSymbol();
+          prepareNextTurn();
+          checkIfRow();
+        } else if (sm == false) {
+          drawXorO();
+          colorSymbol();
+          sm = true;
+          prepareNextTurn();
+          playerTurn();
+          turn++;
+          checkIfRow();
+        } else {
+          console.log("The middle square is already taken.");
+        }
+        break;
+      case "scr":
+        scrInner = nextPlayer;
+        if ((scr == true) & (turn == 9)) {
+          console.log("The center right square is already taken.");
+        } else if ((scr == false) & (turn == 9)) {
+          drawXorO();
+          colorSymbol();
+          prepareNextTurn();
+          checkIfRow();
+        } else if (scr == false) {
+          drawXorO();
+          colorSymbol();
+          scr = true;
+          prepareNextTurn();
+          playerTurn();
+          turn++;
+          checkIfRow();
+        } else {
+          console.log("The center right square is already taken.");
+        }
+        break;
+      case "sbl":
+        sblInner = nextPlayer;
+        if ((sbl == true) & (turn == 9)) {
+          console.log("The bottom left square is already taken.");
+        } else if ((sbl == false) & (turn == 9)) {
+          drawXorO();
+          colorSymbol();
+          prepareNextTurn();
+          checkIfRow();
+        } else if (sbl == false) {
+          drawXorO();
+          colorSymbol();
+          sbl = true;
+          prepareNextTurn();
+          playerTurn();
+          turn++;
+          checkIfRow();
+        } else {
+          console.log("The bottom left square is already taken.");
+        }
+        break;
+      case "sbc":
+        sbcInner = nextPlayer;
+        if ((sbc == true) & (turn == 9)) {
+          console.log("The bottom center square is already taken.");
+        } else if ((sbc == false) & (turn == 9)) {
+          drawXorO();
+          colorSymbol();
+          prepareNextTurn();
+          checkIfRow();
+        } else if (sbc == false) {
+          drawXorO();
+          colorSymbol();
+          sbc = true;
+          prepareNextTurn();
+          playerTurn();
+          turn++;
+          checkIfRow();
+        } else {
+          console.log("The bottom center square is already taken.");
+        }
+        break;
+      case "sbr":
+        sbrInner = nextPlayer;
+        if ((sbr == true) & (turn == 9)) {
+          console.log("The bottom right square is already taken.");
+        } else if ((sbr == false) & (turn == 9)) {
+          drawXorO();
+          colorSymbol();
+          prepareNextTurn();
+          checkIfRow();
+        } else if (sbr == false) {
+          drawXorO();
+          colorSymbol();
+          sbr = true;
+          prepareNextTurn();
+          playerTurn();
+          turn++;
+          checkIfRow();
+        } else {
+          console.log("The bottom right square is already taken.");
+        }
+      }
+    }
+
+    // Checks if a player has won this round.
+
+    function checkIfRow() {
+      switch (squareSelected) {
+      case "stl":
+        if ((stlInner == stcInner) & (stlInner == strInner)) {
+          playerWon();
+        } else if ((stlInner == sclInner) & (stlInner == sblInner)) {
+          playerWon();
+        } else if ((stlInner == smInner) & (stlInner == sbrInner)) {
+          playerWon();
+        } else if (lastTurn == true) {
+          roundDraw();
+        }
+        break;
+      case "stc":
+        if ((stcInner == stlInner) & (stcInner == strInner)) {
+          playerWon();
+        } else if ((stcInner == smInner) & (stcInner == sbcInner)) {
+          playerWon();
+        } else if (lastTurn == true) {
+          roundDraw();
+        }
+        break;
+      case "str":
+        if ((strInner == stcInner) & (strInner == stlInner)) {
+          playerWon();
+        } else if ((strInner == scrInner) & (strInner == sbrInner)) {
+          playerWon();
+        } else if ((strInner == smInner) & (strInner == sblInner)) {
+          playerWon();
+        } else if (lastTurn == true) {
+          roundDraw();
+        }
+        break;
+      case "scl":
+        if ((sclInner == smInner) & (sclInner == scrInner)) {
+          playerWon();
+        } else if ((sclInner == stlInner) & (sclInner == sblInner)) {
+          playerWon();
+        } else if (lastTurn == true) {
+          roundDraw();
+        }
+        break;
+      case "sm":
+        if ((smInner == sclInner) & (smInner == scrInner)) {
+          playerWon();
+        } else if ((smInner == stcInner) & (smInner == sbcInner)) {
+          playerWon();
+        } else if ((smInner == stlInner) & (smInner == sbrInner)) {
+          playerWon();
+        } else if ((smInner == sblInner) & (smInner == strInner)) {
+          playerWon();
+        } else if (lastTurn == true) {
+          roundDraw();
+        }
+        break;
+      case "scr":
+        if ((scrInner == smInner) & (scrInner == sclInner)) {
+          playerWon();
+        } else if ((scrInner == strInner) & (scrInner == sbrInner)) {
+          playerWon();
+        } else if (lastTurn == true) {
+          roundDraw();
+        }
+        break;
+      case "sbl":
+        if ((sblInner == sbcInner) & (sblInner == sbrInner)) {
+          playerWon();
+        } else if ((sblInner == sclInner) & (sblInner == stlInner)) {
+          playerWon();
+        } else if ((sblInner == smInner) & (sblInner == strInner)) {
+          playerWon();
+        } else if (lastTurn == true) {
+          roundDraw();
+        }
+        break;
+      case "sbc":
+        if ((sbcInner == sblInner) & (sbcInner == sbrInner)) {
+          playerWon();
+        } else if ((sbcInner == smInner) & (sbcInner == stcInner)) {
+          playerWon();
+        } else if (lastTurn == true) {
+          roundDraw();
+        }
+        break;
+      case "sbr":
+        if ((sbrInner == sbcInner) & (sbrInner == sblInner)) {
+          playerWon();
+        } else if ((sbrInner == scrInner) & (sbrInner == strInner)) {
+          playerWon();
+        } else if ((sbrInner == smInner) & (sbrInner == stlInner)) {
+          playerWon();
+        } else if (lastTurn == true) {
+          roundDraw();
+        }
+      }
+    }
+
+    // All possible winning combinations.
+
+    // Invoked whenever one of the players clicks/taps the “Play again!” button at the end of turn 9.
+
+    function newRound() {
+      lastTurn = false;
+      turn = 1;
+      nextPlayer = "X";
+      document.getElementById("scoreboard").innerHTML = "Turn: " + nextPlayer;
+      document.getElementById("stl").innerHTML = "";
+      document.getElementById("stc").innerHTML = "";
+      document.getElementById("str").innerHTML = "";
+      document.getElementById("scl").innerHTML = "";
+      document.getElementById("sm").innerHTML = "";
+      document.getElementById("scr").innerHTML = "";
+      document.getElementById("sbl").innerHTML = "";
+      document.getElementById("sbc").innerHTML = "";
+      document.getElementById("sbr").innerHTML = "";
+      stl = false;
+      stc = false;
+      str = false;
+      scl = false;
+      sm = false;
+      scr = false;
+      sbl = false;
+      sbc = false;
+      sbr = false;
+      stlInner = "";
+      stcInner = "";
+      strInner = "";
+      sclInner = "";
+      smInner = "";
+      scrInner = "";
+      sblInner = "";
+      sbcInner = "";
+      sbrInner = "";
+      document.getElementById("button").style.display = "none";
+    }
+
+  </script>
+
+</body>
+</html>
